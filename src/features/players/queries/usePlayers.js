@@ -1,11 +1,11 @@
 import { gql, useQuery } from '@apollo/client';
 
 export function usePlayersQuery(variables) {
-  const { data, loading, error } = useQuery(PLAYERS_QUERY, {
+  const { data, loading, error, refetch } = useQuery(PLAYERS_QUERY, {
     variables: variables
   });
 
-  return { data, loading, error };
+  return { data, loading, error, refetch };
 }
 
 const PLAYERS_QUERY = gql`

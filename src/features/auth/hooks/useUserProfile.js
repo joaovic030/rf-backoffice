@@ -1,8 +1,8 @@
 import { useContext } from 'react';
 import { authContext } from '../utils/authContext';
 
-export function useAuthToken() {
+export function useUserProfile() {
   const value = useContext(authContext);
 
-  return value.authToken;
+  return value.user;
 }

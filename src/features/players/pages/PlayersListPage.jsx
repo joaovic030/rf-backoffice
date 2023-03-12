@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
 import { Navigate } from 'react-router-dom';
-import { useAuthToken } from '../../auth/hooks/useAuthToken';
+import { useUserProfile } from '../../auth/hooks/useUserProfile';
 import { usePlayersQuery } from '../queries/usePlayers';
 import { useActivateSubscription, useCancelSubscription } from '../../subscription/mutations/useSubscription';
 import { Card, Button, Pagination, Row, FloatingLabel, Form } from 'react-bootstrap'
 import { Header } from '../../shared/components/Header';
+import { useApolloClient } from '@apollo/client';
 
 const PAGE_SIZE = 20;
 const OPTIONS_FOR_SELECT = ['name_desc', 'position_asc', 
@@ -14,28 +15,37 @@ const OPTIONS_FOR_SELECT = ['name_desc', 'position_asc',
 export function PlayersListPage() {
   const [page, setPage] = useState(0);
   const [orderBy, setOrderBy] = useState('name_asc');
-  const authToken = useAuthToken();
+  const userProfile = useUserProfile();
   
   const subscribe = useActivateSubscription();
   const cancelSub = useCancelSubscription();
-
+  
+  const client = useApolloClient();
+  
+  const players = usePlayersQuery({ skip: page * PAGE_SIZE, limit: PAGE_SIZE, orderBy: orderBy });
+  
   const activateSubscription = (player_id) => {
-    subscribe({ variables: { playerId: player_id } })
+    subscribe({ variables: { playerId: player_id } });
+    handleRefetch();
   }
 
   const cancelSubscription = (player_id) => {
-    cancelSub({ variables: { playerId: player_id } })
+    cancelSub({ variables: { playerId: player_id } });
+    handleRefetch();
   }
+  const handleRefetch = async () => {
+    await players.refetch();
 
-  console.log(`----->> ${authToken}`);
-  const players = usePlayersQuery({ skip: page * PAGE_SIZE, limit: PAGE_SIZE, orderBy: orderBy })
+    client.cache.evict({ fieldName: 'PlayersQuery' });
+    client.cache.gc();
+  }
   
   if (players.loading) return '...';
   if (players.error) return <React.Fragment>Error: ${players.error.message}</React.Fragment>;
 
-  // if (!authToken) {
-  //   return <Navigate to="/login" />;
-  // }
+  if (!userProfile) {
+    return <Navigate to="/login" />;
+  }
 
   return (
     <>

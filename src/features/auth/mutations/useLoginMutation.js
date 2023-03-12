@@ -4,13 +4,12 @@ import { useContext } from 'react';
 import { Navigate, useNavigate } from 'react-router-dom';
 
 export function useLoginMutation() {
-  const { setAuthToken, setUser } = useContext(authContext);
+  const { setUser } = useContext(authContext);
   const navigate = useNavigate();
 
   const [login, { data, loading, error }] = useMutation(LOGIN_MUTATION, {
     onCompleted: (data) => {
       console.log("Data from userSignIn:", data.signinUser);
-      setAuthToken(data.signinUser.token);
       setUser(data.signinUser.user);
       navigate("/players");
     },
