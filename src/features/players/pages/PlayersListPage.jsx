@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
-import { Navigate } from 'react-router-dom';
+import { Link, Navigate } from 'react-router-dom';
 import { useUserProfile } from '../../auth/hooks/useUserProfile';
 import { usePlayersQuery } from '../queries/usePlayers';
-import { useActivateSubscription, useCancelSubscription } from '../../subscription/mutations/useSubscription';
-import { Card, Button, Pagination, Row, FloatingLabel, Form } from 'react-bootstrap'
+import { useDeletePlayer } from '../mutations/useDeletePlayer'
+import { Button, Pagination, Row, FloatingLabel, Form, Table } from 'react-bootstrap'
 import { Header } from '../../shared/components/Header';
 import { useApolloClient } from '@apollo/client';
 
@@ -17,22 +17,17 @@ export function PlayersListPage() {
   const [orderBy, setOrderBy] = useState('name_asc');
   const userProfile = useUserProfile();
   
-  const subscribe = useActivateSubscription();
-  const cancelSub = useCancelSubscription();
+  const deletePlayer = useDeletePlayer();
   
   const client = useApolloClient();
   
   const players = usePlayersQuery({ skip: page * PAGE_SIZE, limit: PAGE_SIZE, orderBy: orderBy });
   
-  const activateSubscription = (player_id) => {
-    subscribe({ variables: { playerId: player_id } });
+  const handleDelete = (playerId) => {
+    deletePlayer({ variables: { id: playerId } });
     handleRefetch();
   }
 
-  const cancelSubscription = (player_id) => {
-    cancelSub({ variables: { playerId: player_id } });
-    handleRefetch();
-  }
   const handleRefetch = async () => {
     await players.refetch();
 
@@ -63,24 +58,41 @@ export function PlayersListPage() {
             </Form.Select>
           </FloatingLabel>
         </Row>
-        {players.data.players.nodes.map((player) => (
-          <Card className='mt-3'>
-            <Card.Header as="h5"> {player.name} </Card.Header>
-            <Card.Body>
-              <Card.Title>Player {player.name}, {player.age} years old.</Card.Title>
-              <Card.Text>
-                <ul>
-                  <li key={((player || {}).team || {}).name}> Plays for: {((player || {}).team || {}).name} </li>
-                  <li key={player.nationality}> Nationality: {player.nationality} </li>
-                  <li key={player.position}> Position: {player.position} </li>
-                  <li key={player.number}> Number: {player.number} </li>
-                </ul>
-              </Card.Text>
-              {player.subscribed && <Button variant="danger" onClick={() => cancelSubscription(parseInt(player.id))}>Unsubscribe notifications</Button>}
-              {!player.subscribed && <Button variant="primary" onClick={() => activateSubscription(parseInt(player.id))}>Subscribe for notifications</Button>}
-            </Card.Body>
-          </Card>
-        ))}
+
+        <Table striped bordered hover variant="dark">
+          <thead>
+            <tr>
+              <th>Id</th>
+              <th>Name</th>
+              <th>Position</th>
+              <th>Number</th>
+              <th>Nationality</th>
+              <th>Age</th>
+              <th>Team</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            {players.data.players.nodes.map((player) => (
+              <tr key={player.id}>
+              <td>{player.id}</td>
+              <td>{player.name}</td>
+              <td>{player.position}</td>
+              <td>{player.number}</td>
+              <td>{player.nationality}</td>
+              <td>{player.age}</td>
+              <td>{((player || {}).team || {}).name}</td>
+              <td>
+                <div className='d-flex justify-content-evenly'>
+                  <Link to="/player" state={{ player: player }} className='btn btn-primary'>Show</Link>
+
+                  <Button variant='danger' onClick={() => handleDelete(player.id)}>Delete</Button>
+                </div>
+              </td>
+            </tr>
+            ))}
+          </tbody>
+        </Table>
 
         <Pagination className='justify-content-center'>
           <Pagination.Prev disabled={!page} onClick={() => setPage((prev) => prev - 1)} />

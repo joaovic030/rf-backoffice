@@ -16,13 +16,11 @@ const PLAYERS_QUERY = gql`
         name
         position
         number
-        age
         nationality
-        subscribed
+        age
         team {
           id
           name
-          acronym
         }
       }
     }
