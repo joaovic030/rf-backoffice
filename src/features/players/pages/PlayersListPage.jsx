@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link, Navigate } from 'react-router-dom';
 import { useUserProfile } from '../../auth/hooks/useUserProfile';
 import { usePlayersQuery } from '../queries/usePlayers';
 import { useDeletePlayer } from '../mutations/useDeletePlayer'
-import { Button, Pagination, Row, FloatingLabel, Form, Table } from 'react-bootstrap'
+import { Button, Pagination, Row, FloatingLabel, Form, Table, Col } from 'react-bootstrap'
 import { Header } from '../../shared/components/Header';
 import { useApolloClient } from '@apollo/client';
 
@@ -23,6 +23,10 @@ export function PlayersListPage() {
   
   const players = usePlayersQuery({ skip: page * PAGE_SIZE, limit: PAGE_SIZE, orderBy: orderBy });
   
+  useEffect(() => {
+    handleRefetch();
+  });
+
   const handleDelete = (playerId) => {
     deletePlayer({ variables: { id: playerId } });
     handleRefetch();
@@ -46,13 +50,21 @@ export function PlayersListPage() {
     <>
       <Header />
       <div className="container">
+        <Row>
+          <Col sm={10}>
+            <h1>Players</h1>
+          </Col>
+          <Col sm={2} className="align-items-center">
+            <Link to="/create_player" className='btn btn-success'>Create new player</Link>
+          </Col>
+        </Row>
         <Row className='mt-3'>
           <FloatingLabel controlId="floatingSelect" label="Order by">
             <Form.Select aria-label="floatingSelect" onChange={(event) => setOrderBy(event.target.value)}>
               <option value='name_asc'>Choose one</option>
               {OPTIONS_FOR_SELECT.map((opt) => (
                 <>
-                  <option value={opt}>{opt.split('_').map((str) => str.charAt(0).toUpperCase() + str.slice(1)).join(' ')}</option>
+                  <option key={opt} value={opt}>{opt.split('_').map((str) => str.charAt(0).toUpperCase() + str.slice(1)).join(' ')}</option>
                 </>
               ))}
             </Form.Select>

@@ -14,7 +14,7 @@ export function useUpdatePlayer() {
 }
 
 const UPDATE_PLAYER_MUTATION = gql`
-  mutation UpdatePlayerMutation($id: ID!, $name: String!, $position: String!, $number: Int, $nationality: String, $age: Int, $team_id: Int){
+  mutation UpdatePlayerMutation($id: ID!, $name: String!, $position: String!, $number: Int, $nationality: String, $age: Int, $teamId: Int){
     updatePlayer(
         id: $id,
         name: $name,
@@ -22,7 +22,7 @@ const UPDATE_PLAYER_MUTATION = gql`
         number: $number, 
         nationality: $nationality,
         age: $age,
-        teamId: $team_id
+        teamId: $teamId
     ) {
         id
         name

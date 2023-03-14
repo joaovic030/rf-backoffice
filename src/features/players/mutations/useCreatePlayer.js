@@ -6,8 +6,9 @@ export function useCreatePlayer() {
 
   const [player, { data, loading, error }] = useMutation(CREATE_PLAYER_MUTATION, {
     onCompleted: (data) => {
-      alert(`Player ${data.createPlayer.name} created successfully!`);
-      navigate("/players");
+      if (!error) alert(`Player ${data.createPlayer.name} created successfully!`);
+      
+      if(!error) navigate("/players");
     },
   });
 
@@ -15,16 +16,17 @@ export function useCreatePlayer() {
 }
 
 const CREATE_PLAYER_MUTATION = gql`
-  mutation CreatePlayerMutation($name: String!, $position: String!, $number: Int, $nationality: String, $age: Int, $team_id: Int){
+  mutation CreatePlayerMutation($name: String!, $position: String!, $number: Int, $nationality: String, $age: Int, $teamId: Int){
     createPlayer(
         name: $name,
         position: $position,
         number: $number, 
         nationality: $nationality,
         age: $age,
-        team_id: $team_id
+        teamId: $teamId
     ) {
         id
+        name
     }
   }
 `;

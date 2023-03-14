@@ -1,9 +1,9 @@
 import { gql, useQuery } from '@apollo/client';
 
 export function useTeamsQuery() {
-  const { data, loading, error, refetch } = useQuery(TEAMS_QUERY);
+  const { data, loading } = useQuery(TEAMS_QUERY);
 
-  return { data, loading, error, refetch };
+  return { data, loading };
 }
 
 const TEAMS_QUERY = gql`
